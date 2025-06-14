@@ -24,19 +24,6 @@ To use `csview.h` in your project, you need to do two things:
 #include "csview.h"
 ```
 
-## Building the Example
-
-The provided main.c demonstrates the library's features. To compile it on a system with GCC or Clang, run the following command in your terminal:
-```shell
-gcc -std=c99 -Wall -o main main.c
-```
-
-Then, run the compiled program:
-
-```shell
-./main
-```
-
 ## Examples
 
 The library supports two memory management patterns:
