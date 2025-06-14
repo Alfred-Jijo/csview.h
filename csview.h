@@ -27,41 +27,42 @@
  *
  * HOW TO USE
  *
- * This is a single-file header-only library. To use it, do the following:
+ * This is a single-file header-only library.
  *
- * 1.  Drop this file (`csview.h`) into your project directory.
- * 2.  In exactly ONE of your C source files, add the following lines:
+ * 1.  In ONE C file, define the implementation before including the header:
  *
  * #define CSVIEW_IMPLEMENTATION
  * #include "csview.h"
  *
- * 3.  In all other source files where you need to use the library, just
- * include the header normally:
+ * 2.  In all other files, just include the header normally:
  *
  * #include "csview.h"
  *
  *
- * AUTOMATIC MEMORY MANAGEMENT
+ * --- MEMORY MANAGEMENT ---
  *
- * If you are compiling with GCC or Clang, you can use the `autofree_csv` macro
- * to automatically free the memory of a csv_document_t when it goes out of scope.
- *
- * Example:
+ * -> For GCC / Clang:
+ * Use the `autofree_csv` macro for automatic memory management. The document
+ * will be freed when it goes out of scope.
  *
  * void my_function() {
  * autofree_csv csv_document_t* doc = csv_read("my_file.csv", true);
- * if (!doc) {
- * return;
+ * // ... `csv_free(&doc)` is called automatically on function exit.
  * }
- * // ... do work with doc ...
  *
- * } // `csv_free(&doc)` is automatically called here.
+ * -> For MSVC & Other Compilers:
+ * You MUST free the document manually using `csv_free()`.
  *
+ * void my_function() {
+ * csv_document_t* doc = csv_read("my_file.csv", true);
+ * // ... do work ...
+ * csv_free(&doc); // Manual cleanup is required.
+ * }
  *
  * =====================================================================================
  *
  * Library:  csview.h
- * Version:  2.1
+ * Version:  2.2
  * Created:  06/11/2024
  *
  * Author:  Alfred Jijo
@@ -71,6 +72,7 @@
 #ifndef CSVIEW_H
 #define CSVIEW_H
 
+// Keep these standard headers as they are not for I/O
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
@@ -111,9 +113,11 @@ void csv_info(const csv_document_t* doc);
 
 
 // =====================================================================================
+// =====================================================================================
 //
 //    IMPLEMENTATION SECTION
 //
+// =====================================================================================
 // =====================================================================================
 
 #ifdef CSVIEW_IMPLEMENTATION
@@ -136,6 +140,8 @@ void csv_info(const csv_document_t* doc);
         const platform_file_t PLATFORM_INVALID_FILE = -1;
 #endif
 
+// -- Low-Level I/O Abstraction Layer --
+
 // Unnamed enum for internal constants, replacing "magic numbers"
 enum {
         _CSV_INTERNAL_BUFFER_SIZE = 4096,
@@ -144,10 +150,10 @@ enum {
         _CSV_MAX_INT_STR_SIZE = 12 // For -2147483647 and null terminator
 };
 
+// Simple integer-to-string conversion, replaces sprintf(buf, "%d", ...)
 static
 void
-_itoa(int value,
-      char* buffer)
+_itoa(int value, char* buffer)
 {
         char temp[12];
         int i = 0;
@@ -184,8 +190,7 @@ _itoa(int value,
 // Writes a buffer to the console (stdout)
 static
 void
-_platform_console_write(const char* buffer,
-			size_t len)
+_platform_console_write(const char* buffer, size_t len)
 {
 #if defined(_WIN32)
         HANDLE h_stdout = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -223,9 +228,7 @@ _platform_file_open_write(const char* path)
 // Reads from a file into a buffer
 static
 long
-_platform_file_read(platform_file_t file,
-		    char* buffer,
-		    long buffer_size)
+_platform_file_read(platform_file_t file, char* buffer, long buffer_size)
 {
 #if defined(_WIN32)
         DWORD bytes_read;
@@ -241,9 +244,7 @@ _platform_file_read(platform_file_t file,
 // Writes a buffer to a file
 static
 bool
-_platform_file_write(platform_file_t file,
-		     const char* buffer,
-		     long len)
+_platform_file_write(platform_file_t file, const char* buffer, long len)
 {
 #if defined(_WIN32)
         DWORD bytes_written;
@@ -280,9 +281,7 @@ typedef struct {
 // Reads one line from the buffered reader. Returns bytes in line, or 0 for EOF, or -1 for error.
 static
 long
-_read_line(buffered_reader_t* reader,
-	   char* line_out,
-	   long max_len)
+_read_line(buffered_reader_t* reader, char* line_out, long max_len)
 {
         long line_pos = 0;
         while (line_pos < max_len - 1) {
@@ -308,6 +307,8 @@ _read_line(buffered_reader_t* reader,
 
 
 // ---- Main Library Implementation ----
+
+// (This function does not change as it only deals with string manipulation)
 static
 csv_row_t*
 _parse_csv_line(const char* line)
@@ -502,7 +503,7 @@ csv_show(const csv_document_t* doc)
                 for (int j = 0; j < doc->rows[i]->num_fields; j++) {
                         if (j < doc->num_cols) {
                                 _platform_console_write(doc->rows[i]->fields[j], strlen(doc->rows[i]->fields[j]));
-                                for(int p = strlen(doc->rows[i]->fields[j]); p < col_widths[j]; p++) { _platform_console_write(" ", 1); }
+                                for(int p = strlen(doc->rows[i]->fields[j]); p < col_widths[i]; p++) { _platform_console_write(" ", 1); }
                                 _platform_console_write(" | ", 3);
                         }
                 }
