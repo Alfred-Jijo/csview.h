@@ -1,13 +1,68 @@
 /*
  * =====================================================================================
  *
+ * The MIT License
+ *
+ * Copyright (c) 2025 Alfred Jijo
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * =====================================================================================
+ *
+ * HOW TO USE
+ *
+ * This is a single-file header-only library. To use it, do the following:
+ *
+ * 1.  Drop this file (`csview.h`) into your project directory.
+ * 2.  In exactly ONE of your C source files, add the following lines:
+ *
+ * #define CSVIEW_IMPLEMENTATION
+ * #include "csview.h"
+ *
+ * 3.  In all other source files where you need to use the library, just
+ * include the header normally:
+ *
+ * #include "csview.h"
+ *
+ *
+ * AUTOMATIC MEMORY MANAGEMENT
+ *
+ * If you are compiling with GCC or Clang, you can use the `autofree_csv` macro
+ * to automatically free the memory of a csv_document_t when it goes out of scope.
+ *
+ * Example:
+ *
+ * void my_function() {
+ * autofree_csv csv_document_t* doc = csv_read("my_file.csv", true);
+ * if (!doc) {
+ * return;
+ * }
+ * // ... do work with doc ...
+ *
+ * } // `csv_free(&doc)` is automatically called here.
+ *
+ *
+ * =====================================================================================
+ *
  * Library:  csview.h
- *
- * Description:  A single-file C99 header-only library for parsing, writing,
- * and displaying CSV (Comma Separated Values) data. This version uses
- * platform-native APIs for file and console I/O instead of the CRT.
- *
- * Version:  2.0
+ * Version:  2.1
+ * Created:  06/11/2024
  *
  * Author:  Alfred Jijo
  * =====================================================================================
